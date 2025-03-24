@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { User, UserServiceInterface } from './interfaces/user.interface';
 import { CreateUserDto, UpdateUserDto, LoginDto, ChangePasswordDto, VerifyUserDto } from './dto/user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -24,10 +24,10 @@ export class UserService implements UserServiceInterface{
             throw new Error('User already registred.');
         }
 
-        const saltRounds=10;
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(createUserDto.password, salt);
+        const hashedPassword = this.encryptPassword(createUserDto.password,10)
+
         const code= Math.floor(Math.random()*100)
+
         const dto: sendEmailDto={
             recipients:[createUserDto.email],
             subject:"verification code",
@@ -39,7 +39,7 @@ export class UserService implements UserServiceInterface{
         
         const newUser=new this.userModel({
             ...createUserDto,
-            password:hash,
+            password:hashedPassword,
             verificationCode:code,
         });
         
@@ -79,8 +79,11 @@ export class UserService implements UserServiceInterface{
         throw new Error('Method not implemented.');
     }
 
-    remove(id: string): Promise<void> {
-        throw new Error('Method not implemented.');
+    async remove(id: string): Promise<void> {
+        const result=await this.userModel.findByIdAndDelete(id).exec();
+        if (!result) {
+            throw new NotFoundException(`Error, the user with id: ${id}, doesnt exists`)
+        }
     }
 
     async verifyUser(verifyUserDto: VerifyUserDto): Promise<User> {//verificar email
@@ -98,7 +101,7 @@ export class UserService implements UserServiceInterface{
 
         reqUser.isVerified=true;//DEFINIRLO EN EL SCHEMA
         const savedUser= await reqUser.save()//O PARA NO OBTENER EL OBJETO HACEMOS
-                                             //EN .SAVEANDUPDATE DIRECTAMENTE EN ReqUser
+                                             //EN .findByIdAndUpdate DIRECTAMENTE EN ReqUser
         return this.mapToUserInterface(savedUser);
     }
 
@@ -110,10 +113,30 @@ export class UserService implements UserServiceInterface{
         throw new Error('Method not implemented.');
     }
 
-    changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<void> {//UN PATCH
-        throw new Error('Method not implemented.');
+    async changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<void> {//UN PATCH
+        const reqUser=await this.userModel.findById(id).exec()
+
+        
+        if (!reqUser) {
+            throw new NotFoundException(`User with id ${id} not found`);
+        }
+
+        const match= await bcrypt.compare(changePasswordDto.currentPassword,reqUser.password)//PARA COMPARAR LA CONTRASEÑA INGRESADA CON LA ENCRIPTADA
+        if (!match) {
+            throw new UnauthorizedException("error... the password entered doesnt match")
+        }
+        const hashedPassword=await this.encryptPassword(changePasswordDto.newPassword,10)
+        await this.userModel.findByIdAndUpdate(id,{password:hashedPassword},{new:true}).lean().exec()
+        
     }
     
+
+   
+    async encryptPassword(password: string, saltRounds: number): Promise<string> {
+        const salt = await bcrypt.genSalt(saltRounds);
+        return await bcrypt.hash(password, salt);
+    }
+
     private mapToUserInterface(userDoc: any): User {
         console.log("datos del doc",userDoc); // Verifica qué datos contiene el documento
 
@@ -126,6 +149,7 @@ export class UserService implements UserServiceInterface{
             isVerified: userDoc.isVerified,
             verificationCode: userDoc.verificationCode,
             role: userDoc.role,
+            
             
         
         };
