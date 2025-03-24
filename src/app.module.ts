@@ -5,6 +5,7 @@ import { TaskModule } from './task/task.module';
 import { databaseConfig } from './config/database.config';
 import { UserModule } from './users/user.module';
 import { EmailModule } from './email/email.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { EmailModule } from './email/email.module';
         };
       },
     }),
-    TaskModule,UserModule, EmailModule
+    TaskModule,UserModule, EmailModule, AuthModule
   ],
 })
 export class AppModule {}

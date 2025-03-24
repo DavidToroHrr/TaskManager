@@ -10,9 +10,10 @@ import {
     Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ChangePasswordDto, CreateUserDto, VerifyUserDto } from './dto/user.dto';
+import { ChangePasswordDto, CreateUserDto, UpdateUserDto, VerifyUserDto } from './dto/user.dto';
 import { User } from './interfaces/user.interface';
 import { EmailController } from 'src/email/email.controller';
+import { promises } from 'dns';
 
 @Controller('api/v1/users')
 export class UserController {
@@ -34,6 +35,11 @@ async findById(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);//ENCONTRAR POR ID
 }
 
+@Get()
+async findAllUsers(): Promise<User[]>{
+    return this.userService.findAll()
+}
+
 @Delete(':id')
 @HttpCode(HttpStatus.NO_CONTENT)
 async remove(@Param('id') id: string){
@@ -47,6 +53,14 @@ async updatePassword(
     @Body() changePasswordDto:ChangePasswordDto
 ): Promise<void>{
     this.userService.changePassword(id, changePasswordDto)
+}
+
+@Put('update-user/:id')
+async updateUser(
+    @Param('id') id:string, 
+    @Body() updateUserDto:UpdateUserDto
+    ):Promise <User>{
+    return this.userService.update(id,updateUserDto)
 }
 
 //   @Put(':id')

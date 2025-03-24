@@ -24,7 +24,7 @@ export class UserService implements UserServiceInterface{
             throw new Error('User already registred.');
         }
 
-        const hashedPassword = this.encryptPassword(createUserDto.password,10)
+        const hashedPassword = await this.encryptPassword(createUserDto.password,10)
 
         const code= Math.floor(Math.random()*100)
 
@@ -49,9 +49,9 @@ export class UserService implements UserServiceInterface{
     }
 
 
-    findAll(): Promise<User[]> {//ENCONTRARLOS A TODOS
-        throw new Error('Method not implemented.');
-        
+    async findAll(): Promise<User[]> {//ENCONTRARLOS A TODOS
+        const users=await this.userModel.find().exec()   
+        return users.map(user=>this.mapToUserInterface(user))
     }
 
     async findOne(id: string): Promise<User> {//ENCONTRAR POR ID
@@ -75,9 +75,14 @@ export class UserService implements UserServiceInterface{
         return user ? this.mapToUserInterface(user) : null; // Devuelve null en lugar de lanzar un error 
     }
 
-    update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-        throw new Error('Method not implemented.');
+    async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+        const userUpdated= await this.userModel.findByIdAndUpdate(id,updateUserDto,{new:true});
+        if (!userUpdated) {
+            throw new NotFoundException("Error, the user doesnt found...")
+        }
+        return this.mapToUserInterface(userUpdated)
     }
+
 
     async remove(id: string): Promise<void> {
         const result=await this.userModel.findByIdAndDelete(id).exec();
@@ -126,12 +131,11 @@ export class UserService implements UserServiceInterface{
             throw new UnauthorizedException("error... the password entered doesnt match")
         }
         const hashedPassword=await this.encryptPassword(changePasswordDto.newPassword,10)
-        await this.userModel.findByIdAndUpdate(id,{password:hashedPassword},{new:true}).lean().exec()
+        reqUser.password=hashedPassword
+        await reqUser.save()
         
     }
     
-
-   
     async encryptPassword(password: string, saltRounds: number): Promise<string> {
         const salt = await bcrypt.genSalt(saltRounds);
         return await bcrypt.hash(password, salt);
@@ -142,16 +146,13 @@ export class UserService implements UserServiceInterface{
 
         return {
             id: userDoc._id ? userDoc._id.toString() : userDoc.id,
-            name: userDoc.username,
+            name: userDoc.name,
             email: userDoc.email,
             createdAt: userDoc.createdAt,
             updatedAt: userDoc.updatedAt,
             isVerified: userDoc.isVerified,
             verificationCode: userDoc.verificationCode,
             role: userDoc.role,
-            
-            
-        
         };
     }
 }

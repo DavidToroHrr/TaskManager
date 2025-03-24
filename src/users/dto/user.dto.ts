@@ -67,10 +67,11 @@ export class ChangePasswordDto {
   newPassword: string;
 }
 
-export class VerifyUserDto{
+export class VerifyUserDto{//CLASE DTO AÑADIDA PARA HACER PEQUEÑAS 
+                           // VALIDACIONES DE LOS DATOS DE ENTRADA
   @IsNotEmpty()
   @IsString()
-  email: string;
+  email: string;//PODEMOS DEJARLO CON EL ID
 
   @IsNotEmpty()
   @IsString()
