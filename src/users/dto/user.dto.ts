@@ -12,6 +12,10 @@ export class CreateUserDto {
   name: string;
 
   @IsNotEmpty()
+  @IsString()
+  role: string;
+
+  @IsNotEmpty()
   @IsEmail()
   email: string;
 
@@ -61,4 +65,14 @@ export class ChangePasswordDto {
   @IsString()
   @MinLength(6)
   newPassword: string;
+}
+
+export class VerifyUserDto{
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  code: string;
 }

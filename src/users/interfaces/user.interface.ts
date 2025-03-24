@@ -3,17 +3,19 @@ import {
   CreateUserDto,
   LoginDto,
   UpdateUserDto,
+  VerifyUserDto,
 } from '../dto/user.dto';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  isVerified: boolean;
-  role: string;
+  isVerified: boolean;//LO AGREGUÉ
+  role: string;//???
   refreshToken?: string;
   createdAt: Date;
   updatedAt: Date;
+  verificationCode: string,//LO AGREGUÉ
 }
 
 export interface UserServiceInterface {
@@ -23,7 +25,12 @@ export interface UserServiceInterface {
   findByEmail(email: string): Promise<User>;
   update(id: string, updateUserDto: UpdateUserDto): Promise<User>;
   remove(id: string): Promise<void>;
-  verifyUser(id: string): Promise<User>;
+  verifyUser(verifyUserDto:VerifyUserDto): Promise<User>;//DEBEMOS DE DEFINIR EL EMAIL PARA 
+                                        //OBTENER EL CODE DEL USUARIO
+                                        //Y ASÍ COMPARARLO CON EL INPUT
+                                        //QUE ESCRIBA EL USUARIO
+                                        //DEBEMOS DE DEFINIR UN CAMPO
+                                        //PARA EL CODE
   login(
     loginDto: LoginDto,
   ): Promise<{ accessToken: string; refreshToken: string; user: User }>;

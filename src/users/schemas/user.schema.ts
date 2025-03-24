@@ -24,6 +24,15 @@ export class UserModel {
   @Prop({required:true})
   password: string;
 
+  @Prop({required:false})
+  verificationCode: string;//TUVE QUE AGREGARLO
+
+  @Prop({required:false, default:false})
+  isVerified: boolean//TUVE QUE AGREGARLO
+
+  @Prop({required:false, default:false})
+  role: string//TUVE QUE AGREGARLO
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TaskModule } from './task/task.module';
 import { databaseConfig } from './config/database.config';
 import { UserModule } from './users/user.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { UserModule } from './users/user.module';
         };
       },
     }),
-    TaskModule,UserModule
+    TaskModule,UserModule, EmailModule
   ],
 })
 export class AppModule {}
