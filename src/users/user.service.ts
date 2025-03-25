@@ -73,7 +73,7 @@ export class UserService implements UserServiceInterface{
     }
 
     async findByEmail(email: string): Promise<User> {//FIND BY ID
-        const user=await this.userModel.findOne({email}).lean().exec();
+        const user=await this.userModel.findOne({email}).exec();
         return  user ? this.mapToUserInterface(user) : null; // Devuelve null en lugar de lanzar un error 
     }
 
@@ -155,7 +155,8 @@ export class UserService implements UserServiceInterface{
             isVerified: userDoc.isVerified,
             verificationCode: userDoc.verificationCode,
             role: userDoc.role,
-            password:userDoc.password
+            password:userDoc.password,
+            refreshToken:userDoc.refreshToken
         };
     }
 }

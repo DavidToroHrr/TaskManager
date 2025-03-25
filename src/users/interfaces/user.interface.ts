@@ -17,7 +17,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   verificationCode: string,//LO AGREGUÉ
-  password: string
+  password: string,
 }
 
 export interface UserServiceInterface {

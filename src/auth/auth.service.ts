@@ -1,11 +1,11 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument, UserModel } from 'src/users/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/users/user.service';
-import { CreateUserDto } from 'src/users/dto/user.dto';
+import { CreateUserDto, VerifyUserDto } from 'src/users/dto/user.dto';
 import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
 import { LoginDto } from './dto/auth.dto';
@@ -39,13 +39,9 @@ export class AuthService {
     }
 
     async signUp(createUserDto: CreateUserDto): Promise<any> {
-
-        // Hash password
         const newUser = await this.userService.create(createUserDto);
 
-        const tokens = await this.getTokens(newUser.id, newUser.email);
-        await this.updateRefreshToken(newUser.id, tokens.refreshToken);
-        return tokens;
+        return newUser;
     }
 
     hashData(data: string) {
@@ -87,5 +83,32 @@ export class AuthService {
         accessToken,
         refreshToken,
     };
+    }
+
+    async refreshTokens(userId: string, refreshToken: string) {
+        console.log("email para refresh",userId)
+        const user = await this.userService.findOne(userId);
+        console.log("....",user)
+        // console.log(user.refreshToken)
+        if (!user || !user.refreshToken)
+            throw new ForbiddenException('Access Denied');
+        const refreshTokenMatches = await argon2.verify(
+            user.refreshToken,
+            refreshToken,
+        );
+        if (!refreshTokenMatches) throw new ForbiddenException('Access Denied, token does not match');
+        const tokens = await this.getTokens(user.id, user.email);
+        await this.updateRefreshToken(user.id, tokens.refreshToken);
+        return tokens;
+    }
+
+    async verifyUser(verifyUserDto:VerifyUserDto){
+        const newUser=await this.userService.verifyUser(verifyUserDto)
+        if (!newUser) {
+            throw new UnauthorizedException("Something went wrong with the verification...")
+        }
+        const tokens = await this.getTokens(newUser.id, newUser.email);
+        await this.updateRefreshToken(newUser.id, tokens.refreshToken);
+        return tokens;
     }
 }
