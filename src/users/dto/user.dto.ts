@@ -4,6 +4,7 @@ import {
   IsString,
   MinLength,
   IsOptional,
+  IsEmpty,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -23,6 +24,8 @@ export class CreateUserDto {
   @IsString()
   @MinLength(6)
   password: string;
+
+  refreshToken: string;
 }
 
 export class UpdateUserDto {
@@ -38,6 +41,10 @@ export class UpdateUserDto {
   @IsString()
   @MinLength(6)
   password?: string;
+
+  @IsOptional()
+  @IsString()
+  refreshToken: string;
 }
 
 export class LoginDto {

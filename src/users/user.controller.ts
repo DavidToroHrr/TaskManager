@@ -8,12 +8,15 @@ import {
     Param,
     Post,
     Put,
+    UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ChangePasswordDto, CreateUserDto, UpdateUserDto, VerifyUserDto } from './dto/user.dto';
 import { User } from './interfaces/user.interface';
 import { EmailController } from 'src/email/email.controller';
 import { promises } from 'dns';
+import { UserDocument } from './schemas/user.schema';
+import { AccessTokenGuard } from 'src/common-guards/accessToken.guard';
 
 @Controller('api/v1/users')
 export class UserController {
@@ -47,6 +50,7 @@ async remove(@Param('id') id: string){
 
 }
 
+@UseGuards(AccessTokenGuard)
 @Put(':id')
 async updatePassword(
     @Param('id') id:string,
@@ -55,6 +59,7 @@ async updatePassword(
     this.userService.changePassword(id, changePasswordDto)
 }
 
+@UseGuards(AccessTokenGuard)
 @Put('update-user/:id')
 async updateUser(
     @Param('id') id:string, 

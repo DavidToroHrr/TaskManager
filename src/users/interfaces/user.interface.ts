@@ -5,6 +5,7 @@ import {
   UpdateUserDto,
   VerifyUserDto,
 } from '../dto/user.dto';
+import { UserDocument } from '../schemas/user.schema';
 
 export interface User {
   id: string;
@@ -16,6 +17,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   verificationCode: string,//LO AGREGUÉ
+  password: string
 }
 
 export interface UserServiceInterface {

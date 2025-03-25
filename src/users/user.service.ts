@@ -45,7 +45,9 @@ export class UserService implements UserServiceInterface{
         
         //debemos de enviar el email al user con el code de verificación
         const savedUser=await newUser.save();
+
         return this.mapToUserInterface(savedUser);
+        
     }
 
 
@@ -55,7 +57,7 @@ export class UserService implements UserServiceInterface{
     }
 
     async findOne(id: string): Promise<User> {//ENCONTRAR POR ID
-        const user = await this.userModel.findById(id).lean().exec()
+        const user = await this.userModel.findById(id).exec()
   // Manejar el caso en el que no se encuentre el usuario
     if (!user) {
         throw new NotFoundException(`User with id ${id} not found`);
@@ -72,7 +74,7 @@ export class UserService implements UserServiceInterface{
 
     async findByEmail(email: string): Promise<User> {//FIND BY ID
         const user=await this.userModel.findOne({email}).lean().exec();
-        return user ? this.mapToUserInterface(user) : null; // Devuelve null en lugar de lanzar un error 
+        return  user ? this.mapToUserInterface(user) : null; // Devuelve null en lugar de lanzar un error 
     }
 
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -117,7 +119,7 @@ export class UserService implements UserServiceInterface{
     refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; }> {
         throw new Error('Method not implemented.');
     }
-
+    
     async changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<void> {//UN PATCH
         const reqUser=await this.userModel.findById(id).exec()
 
@@ -153,6 +155,7 @@ export class UserService implements UserServiceInterface{
             isVerified: userDoc.isVerified,
             verificationCode: userDoc.verificationCode,
             role: userDoc.role,
+            password:userDoc.password
         };
     }
 }

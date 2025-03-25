@@ -33,6 +33,10 @@ export class UserModel {
   @Prop({required:false, default:false})
   role: string//TUVE QUE AGREGARLO
 
+  @Prop() 
+  refreshToken: string;
+
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);
