@@ -36,6 +36,10 @@ export class UserModel {
   @Prop() 
   refreshToken: string;
 
+  @Prop({ required: false })
+  verificationCodeExpiresAt: Date;  //Ponemos nuevo campo para la expiración del code 
+
+
 
 }
 

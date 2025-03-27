@@ -60,7 +60,7 @@ async updatePassword(
 }
 
 @UseGuards(AccessTokenGuard)
-@Put('update-user/:id')
+@Put('update-/:id')
 async updateUser(
     @Param('id') id:string, 
     @Body() updateUserDto:UpdateUserDto
